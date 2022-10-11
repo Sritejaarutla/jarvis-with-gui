@@ -49,9 +49,8 @@ voices = engine.getProperty("voices")  # voices is a variable
 voice[0] and voice[3]=david voice
 voice[1]= microsoft mark voice(better one)'
 voice[2] and voice[4]=zira voice'''
-engine.setProperty("voice", voices[
-    1].id)  # 1st parameter lo voices ani pedthe male voice ye osthadi everytime change it to voice and voices[should be 1 for female 0 for male]
-engine.setProperty("rate", 160)  # 2nd parameter sets speed of voice
+engine.setProperty("voice", voices[1].id)  # 1st parameter lo voices ani pedthe male voice ye osthadi everytime change it to voice and voices[should be 1 for female 0 for male]
+engine.setProperty("rate", 160)  # 2nd parameter sets speed of voice low number= slow voice rate
 
 chose = 0  # for music
 
@@ -103,7 +102,7 @@ class MainThread(QThread):
             startsound=AudioSegment.from_wav("start up sound.wav")
             play(startsound)
             listener.pause_threshold = 1
-            voice = listener.listen(source, timeout=10,
+            voice = listener.listen(source, timeout=15,
                                         phrase_time_limit=5)  # listens user voice from source(microphone)
             # if you dont speak or microphone is off for sometime(5) jarvis will automatically terminate
             endsound=AudioSegment.from_wav("end up sound.wav")
@@ -316,15 +315,38 @@ class MainThread(QThread):
                 print('Current time is ' + time)
                 speak('Current time is ' + time)
 
-            elif "change voice to female" in self.query:
-                engine.setProperty("voice", voices[
-                    2].id)  # 1st parameter lo voices ani pedthe male voice ye osthadi everytime change it to voice and voices[should be 1 for female 0 for male]
-                engine.setProperty("rate", 160)
+            elif "change voice to female" in self.query or "female voice" in self.query or "change to female voice" in self.query or "I want female voice"in self.query:
+                engine.setProperty("voice", voices[2].id)  # 1st parameter lo voices ani pedthe male voice ye osthadi everytime change it to voice and voices[should be 1 for female 0 for male]
+                engine.setProperty("rate", 175)
+                speak("From now I will respond to you in female voice")
 
-            elif "change voice to male" in self.query or "change to male voice" in self.query:
-                engine.setProperty("voice", voices[
-                    1].id)  # 1st parameter lo voices ani pedthe male voice ye osthadi everytime change it to voice and voices[should be 1 for female 0 for male]
+            elif "change voice to male" in self.query in self.query or "male voice " in self.query or "change to male voice" in self.query or "I want male voice "in self.query:
+                engine.setProperty("voice", voices[1].id)  # 1st parameter lo voices ani pedthe male voice ye osthadi everytime change it to voice and voices[should be 1 for female 0 for male]
                 engine.setProperty("rate", 160)
+                speak("From now I will respond to you in female voice")
+
+            #<--------stop or wait jarvis for specific time---------------->
+            elif "wait for" in self.query:
+                self.query=self.query.replace("for","")
+                import time
+                if self.query=="10 seconds" or self.query=="ten seconds":
+                    time.sleep(10)
+
+                elif self.query=="20 seconds" or self.query=="twenty seconds":
+                    time.sleep(20)
+
+                elif self.query=="30 seconds" or self.query=="thiry seconds":
+                    time.sleep(30)
+                
+                elif self.query=="40 seconds" or self.query=="forty seconds" or self.query=="fourty seconds":
+                    time.sleep(40)
+                
+                elif self.query=="50 seconds" or self.query=="fifty seconds":
+                    time.sleep(50)
+                
+                elif self.query=="60 seconds" or self.query=="sixty seconds":
+                    time.sleep(60)
+
 
                 # <------------------------------------SENDING WHATSAPP MESSAGE USING JARVIS------------------------------------------------->
 
@@ -373,7 +395,7 @@ class MainThread(QThread):
                         speak("please enter from available contacts")
                         msgloop = False
         # set brightness percentage 
-            elif "set brighntess level " in self.query or "set brightness":
+            elif "set brighntess level " in self.query or "set brightness" in self.query or "set brightness percentage" in self.query:
                 def run(cmd):
                  completed = subprocess.run(["powershell", "-Command", cmd], capture_output=True)
                  return completed
@@ -503,6 +525,7 @@ class MainThread(QThread):
                 # from verejanmantu import *
 
 
+
         #<----------------------------------------DOCTORSTRANGEUSINGJARVIS---------------------------------------------->
             elif "make me doctor strange" in self.query or "i want to become doctor strange" in self.query\
                     or "make me doctor strange" in self.query:
@@ -600,11 +623,16 @@ class MainThread(QThread):
 
 
             #cp sir
-            elif "what do you know about cp sir" in self.query:
+            elif "what do you know about cp sir" in self.query or "who is cp sir" in self.query:
+                print('''Dr. Ch.V. Purushotham Reddy, B.Ed., M.Sc., Ph.DFounder 
+                / President & ChancellorDr Reddy is instrumental in the promotion of higher education in the backward area of Telangana.
+                 He served as the Principal of Chaitanya Degree College and also the Secretary-cum-Correspondent of Chaitanya Group of Colleges and presently the Founder and Chancellor of Chaitanya Deemed to be University. 
+                 He has participated in 16 National and International seminars, and published some research papers despite his hectic schedule''')
+
                 speak('''Dr. Ch.V. Purushotham Reddy, B.Ed., M.Sc., Ph.DFounder 
                 / President & ChancellorDr Reddy is instrumental in the promotion of higher education in the backward area of Telangana.
                  He served as the Principal of Chaitanya Degree College and also the Secretary-cum-Correspondent of Chaitanya Group of Colleges and presently the Founder and Chancellor of Chaitanya Deemed to be University. 
-                 He has participated in 16 National and International seminars, and published some research papers despite his hectic schedul''')
+                 He has participated in 16 National and International seminars, and published some research papers despite his hectic schedule''')
 
 
 
@@ -635,7 +663,12 @@ class MainThread(QThread):
                 # if i say play saranga dariya then system takes only saranga dariya.''(in this empty string saranga dariya will be stored)
                 print("Playing" + self.query)
                 speak("Playing" + self.query)
-                pywhatkit.playonyt(self.query)
+                pywhatkit.playonyt(self.query)#yt=youtube
+                import time
+                time.sleep(5)# waiting for 3 seconds so that webpage loads and then press f
+
+                pyautogui.hotkey("f")
+                time.sleep(15)
 
 
             elif "search" in self.query or "google" in self.query:
