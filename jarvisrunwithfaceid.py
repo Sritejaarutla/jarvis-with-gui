@@ -8,6 +8,7 @@ import pywhatkit  # This method can be used to remotely control your PC using yo
 import pyautogui
 # from welcome_backsir import *  # welcomeback sir animation code
 from requests import get
+import psutil#to check battery percentage
 import requests
 from bs4 import BeautifulSoup
 import wikipedia
@@ -23,20 +24,26 @@ from PyQt5.QtGui import QMovie
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
-#from PySide2.QtUiTools import loadUiType
-# from PyQt5.uic import LoadUiType
+import subprocess# for battery percentage
 from jarvis_ui_converted import *
 # from jarvis_intro import *
 import sys
 import cv2
 import numpy as np
+import winshell #used to clean recycle bin
 import ffpyplayer
+import ctypes# to turn the screenoff and on
+import win32api, win32con #to turn the screen off and on
 #ffpyplayer for playing audio
 from ffpyplayer.player import MediaPlayer
 # from face_recognition_code_for_jarvis import *
 # from face_recognition_code import *
 import mediapipe as mp
 # from doctorstrange import *
+
+
+
+
 engine = pyt.init("sapi5")
 voices = engine.getProperty("voices")  # voices is a variable
 # print(voices)
@@ -283,7 +290,114 @@ class MainThread(QThread):
                     cv2.destroyAllWindows()
                 PlayVideo(video_path)
 
+            elif "clean recycle bin" in self.query:
+                winshell.recycle_bin().empty(confirm=False, show_progress=False, sound=False)
 
+            elif "turn off the screen" in self.query or "turn the screen off" in self.query:
+                ctypes.windll.user32.SendMessageW(65535, 274, 61808, 2)
+
+            elif "turn on the screen" in self.query or "turn the screen on" in self.query:
+                ctypes.windll.user32.SendMessageW(65535, 274, 61808, -1)
+                x, y = (0,0)#mouse
+                win32api.mouse_event(win32con.MOUSEEVENTF_MOVE, x, y)#mouse will move and prevent from turning off the screen again
+
+            elif "mute volume" in self.query:
+                from sound import Sound
+                Sound.mute()
+            
+            elif "unmute volume" in self.query:
+                from pynput.keyboard import Key,Controller  
+                keyboard = Controller()
+                # keyboard.press(Key.media_volume_up)
+                # keyboard.release(Key.media_volume_up)
+
+        # setting volume to specific number
+            
+            elif "set volume to " in self.query: 
+                self.query = self.query.replace("set volume to ", "")#the query should be as it is the spaces should also be their to  replace perfectly
+                from pynput.keyboard import Key,Controller  
+                keyboard = Controller()
+
+                # range(1)= decreases or increases 2 percent volume (multiple of 2) range(50) means volume becomes 100
+
+                for j in range(50):
+                    keyboard.press(Key.media_volume_up) 
+                    keyboard.release(Key.media_volume_up)
+                #volume ni first 100 chesthanam tarwata dhanni set chesetappudu decrease chesthanam in this way we get accurate results in volume
+                volrange=0
+                # volume=self.takecommand()
+
+                if self.query=="100" or self.query=="hundred":
+                    volrange=50
+                    for i in range(volrange):
+                        keyboard.press(Key.media_volume_down)
+                        keyboard.release(Key.media_volume_down)
+
+                elif self.query =="90" or self.query=="ninety":
+                    volrange=5 #5x2=10, 100-10 =90
+                    for i in range(volrange):
+                        keyboard.press(Key.media_volume_down)
+                        keyboard.release(Key.media_volume_down)
+
+                elif self.query =="80" or self.query=="eighty":
+                    volrange=10  #10x2=20, 100-20 =80
+                    for i in range(volrange):
+                        keyboard.press(Key.media_volume_down)
+                        keyboard.release(Key.media_volume_down)
+
+                elif self.query =="70" or self.query=="seventy":
+                    volrange=15 
+                    for i in range(volrange):
+                        keyboard.press(Key.media_volume_down)
+                        keyboard.release(Key.media_volume_down)
+                
+                elif self.query =="60" or self.query=="sixty":
+                    volrange=20
+                    for i in range(volrange):
+                        keyboard.press(Key.media_volume_down)
+                        keyboard.release(Key.media_volume_down)
+
+                elif self.query =="50" or self.query=="fifty":
+                    volrange=25 
+                    for i in range(volrange):
+                        keyboard.press(Key.media_volume_down)
+                        keyboard.release(Key.media_volume_down)
+                
+                elif self.query =="40" or self.query=="fourty" or self.query=="forty":
+                    volrange=30 
+                    for i in range(volrange):
+                        keyboard.press(Key.media_volume_down)
+                        keyboard.release(Key.media_volume_down)
+
+                elif self.query =="30" or self.query=="thirty":
+                    volrange=35 
+                    for i in range(volrange):
+                        keyboard.press(Key.media_volume_down)
+                        keyboard.release(Key.media_volume_down)
+
+                elif self.query =="20" or self.query=="twenty":
+                    volrange=40
+                    for i in range(volrange):
+                        keyboard.press(Key.media_volume_down)
+                        keyboard.release(Key.media_volume_down)
+                
+                elif self.query =="10" or self.query=="ten":
+                    volrange=45
+                    for i in range(volrange):
+                        keyboard.press(Key.media_volume_down)
+                        keyboard.release(Key.media_volume_down)
+
+                elif self.query =="0" or self.query=="zero":
+                    volrange=50
+                    for i in range(volrange):
+                        keyboard.press(Key.media_volume_down)
+                        keyboard.release(Key.media_volume_down)
+
+                
+                
+                    
+
+                
 
             elif "how are you" in self.query:
                 speak("I'm great thanks for asking")
@@ -384,15 +498,30 @@ class MainThread(QThread):
                         speak("your message will be delivered in 10 to 30 seconds")
                         pywhatkit.sendwhatmsg_instantly(number, msg)  # pywhatkitsends msg instantly
                         speak("message delivered")
+                        pyautogui.hotkey("alt","tab")
                         msgloop = False
 
                     else:
                         speak("please enter from available contacts")
                         msgloop = False
 
+        #brightness percentage control
+            elif "set brightness percentage" in self.query or "set brightness level" in self.query or "set brightness" in self.query:
+                def run(cmd):
+                 completed = subprocess.run(["powershell", "-Command", cmd], capture_output=True)
+                 return completed
+
+                if __name__ == '__main__':
+                    speak("how much brightness percentage should i set ?")
+                    take_brightness=self.takecommand()
+                    command = "(Get-WmiObject -Namespace root/WMI -Class WmiMonitorBrightnessMethods).WmiSetBrightness(1," + take_brightness + ")"
+                    hello_command = f"Write-Host {command}"
+                    hello_info = run(hello_command)
+                    speak(f"{take_brightness} brightness percentage set")
+
 
     #<--------------------------------LIVE SKETCH USING JARVIS-------------------------->
-            elif "draw a sketch of me" in self.query:
+            elif "draw a sketch of me" in self.query or "draw a live sketch of me" in self.query:
                     speak("sure, please give me 5 to 10 seconds")
                     speak("to exit from the live sketch diagram press q")
                 
@@ -440,6 +569,15 @@ class MainThread(QThread):
 
                     cv2.destroyAllWindows()
                     camera.release()
+                    speak("You might think the live sketch diagram is not that great. The problem is the laptop camera comes with only 1 megapixel resolution, I cant do anything about it")
+
+
+        #cp sir
+            elif "what do you know about cp sir" in self.query:
+                speak('''Dr. Ch.V. Purushotham Reddy, B.Ed., M.Sc., Ph.DFounder 
+                / President & ChancellorDr Reddy is instrumental in the promotion of higher education in the backward area of Telangana.
+                 He served as the Principal of Chaitanya Degree College and also the Secretary-cum-Correspondent of Chaitanya Group of Colleges and presently the Founder and Chancellor of Chaitanya Deemed to be University. 
+                 He has participated in 16 National and International seminars, and published some research papers despite his hectic schedule''')
 
 
 
@@ -460,7 +598,7 @@ class MainThread(QThread):
                 play(fs)
                 # from I_just_want_flirtationship import *
 
-            elif "propose me" in self.query or "propose this lady" in self.query or "propose this girl" in self.query:
+            elif "propose me" in self.query or "propose this lady" in self.query or "propose this girl" in self.query or "propose girl" in self.query or "this girl" in self.query:
                 pd = AudioSegment.from_wav("Malli Malli Idhi Rani Roju.wav")
                 play(pd)
                 # from propose_dialogue import *
@@ -507,14 +645,14 @@ class MainThread(QThread):
 
 
         #<----------------------------------------DOCTORSTRANGEUSINGJARVIS---------------------------------------------->
-            elif "make me doctor strange" in self.query or "i want to become doctor strange" in self.query\
-                    or "make me doctor strange" in self.query:
-                speak("as you wish")
-                speak("but please wait for 10 to 30 seconds to open the camera")
-                speak("i will assure you that you will enjoy it")
-                print("press q to exit from doctor strange filter")
-                speak("press q to exit from doctor strange filter")
-                import doctorstrange# from import * throws an error
+            # elif "make me doctor strange" in self.query or "i want to become doctor strange" in self.query\
+            #         or "make me doctor strange" in self.query:
+            #     speak("as you wish")
+            #     speak("but please wait for 10 to 30 seconds to open the camera")
+            #     speak("i will assure you that you will enjoy it")
+            #     print("press q to exit from doctor strange filter")
+            #     speak("press q to exit from doctor strange filter")
+            #     import doctorstrange# from import * throws an error
 
 
 
@@ -684,7 +822,7 @@ class MainThread(QThread):
                 # win +tab=shows running tasks
                 pyautogui.hotkey("winleft", "tab")
 
-            elif "shift tab" in self.query or "switch tab" in self.query:
+            elif "shift tab" in self.query or "switch tab" in self.query or "get back to ur screen" in self.query:
                 # alt+tab=shifts the tab
                 pyautogui.hotkey("alt", "tab")
 
@@ -728,7 +866,7 @@ class MainThread(QThread):
     # <-----------------------------------BATTERY PERCENTAGE(psutil module)------------------------->
 
             elif "battery percentage" in self.query or "what is my battery percentage" in self.query or "battery percentage in my system" in self.query:
-                import psutil
+                # import psutil
 
                 battery = psutil.sensors_battery()
                 percentage = battery.percent
@@ -739,10 +877,10 @@ class MainThread(QThread):
                 elif percentage >= 0 and percentage < 30:
                     speak(f"our system has a very crtical battery left, that is {percentage} percent battery,Please pluggin the charger")
 
-            # elif "jarvis sleep" in self.query or "bye" in self.query or "sleep" in self.query or "close jarvis" in self.query:
-            #         speak("bye")
-            #         speak("press exit to turn me off")
-            #         break
+            elif "jarvis sleep" in self.query or "bye" in self.query or "sleep" in self.query or "close jarvis" in self.query or "terminate yourself" in self.query:
+                    # speak("bye")
+                    speak("press exit to turn me off")
+                    # break
 
 
 
@@ -761,6 +899,10 @@ class Main(QMainWindow):
         self.ui.pushButton_.clicked.connect(self.startTask) #we have to create startTask function becuz it not predefined
         self.ui.pushButton_2.clicked.connect(self.close)# close is predefined
     
+
+    def endtask(self):
+        if "jarvis sleep" in self.query or "bye" in self.query or "sleep" in self.query or "close jarvis" in self.query or "terminate yourself" in self.query:
+         self.ui.pushButton_2.clicked.connect(self.close)
     
     def startTask(self):
         facerecognition()
@@ -774,7 +916,7 @@ class Main(QMainWindow):
         self.ui.label_2.setMovie(self.ui.electricblue1)
         self.ui.electricblue1.start()
 
-        self.ui.neongif=QtGui.QMovie(":/gifs/lib/neon_colour.gif")
+        self.ui.neongif=QtGui.QMovie(":/gifs/lib/3OdB.gif")
         self.ui.label_3.setMovie(self.ui.neongif)
         self.ui.neongif.start()
 
